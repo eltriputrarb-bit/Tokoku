@@ -4,26 +4,38 @@ import { useParams, Link } from 'react-router-dom';
 function TokokuDetail() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
+    const [fetchingProduct, setFetchingProduct] = useState(true);
     const [selectedImg, setSelectedImg] = useState('');
     const [qty, setQty] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [cartLoading, setCartLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
+        setFetchingProduct(true);
         fetch(`/api/products/${id}`)
             .then(res => res.json())
             .then(data => {
-                setProduct(data);
-                const allList = (data.images && data.images.length > 0) ? data.images : [data.image];
-                const validFirst = allList.find(img => Boolean(img)) || '';
-                setSelectedImg(validFirst);
+                if (data && data._id) {
+                    setProduct(data);
+                    const allList = (data.images && data.images.length > 0) ? data.images : [data.image];
+                    const validFirst = allList.find(img => Boolean(img)) || '';
+                    setSelectedImg(validFirst);
+                } else {
+                    setProduct(null);
+                }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                setProduct(null);
+            })
+            .finally(() => {
+                setFetchingProduct(false);
+            });
     }, [id]);
 
     const handleAddToCart = async () => {
         if (!product) return;
-        setLoading(true);
+        setCartLoading(true);
 
         try {
             const res = await fetch('/api/orders', {
@@ -45,14 +57,60 @@ function TokokuDetail() {
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setCartLoading(false);
         }
     };
 
-    if (!product) {
+    // Tampilan Skeleton saat halaman detail sedang memuat data
+    if (fetchingProduct) {
         return (
             <div className="page-container">
-                <p>Memuat produk... <Link to="/">Kembali</Link></p>
+                <nav className="breadcrumb">
+                    <span style={{ color: '#ccc' }}>Beranda / Memuat...</span>
+                </nav>
+
+                <div className="skeleton-detail-container">
+                    <div className="skeleton-gallery">
+                        <div className="skeleton-main-img skeleton-shimmer" />
+                        <div className="skeleton-thumbs-row">
+                            <div className="skeleton-thumb skeleton-shimmer" />
+                            <div className="skeleton-thumb skeleton-shimmer" />
+                            <div className="skeleton-thumb skeleton-shimmer" />
+                        </div>
+                    </div>
+
+                    <div className="skeleton-info-col">
+                        <div className="skeleton-sub skeleton-shimmer" />
+                        <div className="skeleton-head skeleton-shimmer" />
+                        <div className="skeleton-price-large skeleton-shimmer" />
+                        <div className="skeleton-stock skeleton-shimmer" />
+                        <div className="skeleton-desc-lines">
+                            <div className="skeleton-desc-line skeleton-shimmer" style={{ width: '100%' }} />
+                            <div className="skeleton-desc-line skeleton-shimmer" style={{ width: '90%' }} />
+                            <div className="skeleton-desc-line skeleton-shimmer" style={{ width: '70%' }} />
+                        </div>
+                        <div className="skeleton-specs-card">
+                            <div className="skeleton-specs-line skeleton-shimmer" />
+                            <div className="skeleton-specs-line skeleton-shimmer" style={{ width: '45%' }} />
+                        </div>
+                        <div className="skeleton-btn-row">
+                            <div className="skeleton-qty-box skeleton-shimmer" />
+                            <div className="skeleton-btn-cart skeleton-shimmer" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div className="page-container" style={{ textAlign: 'center', padding: '60px 20px' }}>
+                <h3 style={{ marginBottom: '12px', color: '#444' }}>Produk Tidak Ditemukan</h3>
+                <p style={{ color: '#777', marginBottom: '20px' }}>Produk mungkin telah dihapus atau URL tidak valid.</p>
+                <Link to="/" style={{ padding: '10px 20px', background: '#03ac0e', color: 'white', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>
+                    Kembali ke Beranda
+                </Link>
             </div>
         );
     }
@@ -123,9 +181,9 @@ function TokokuDetail() {
                         <button
                             className="btn-cart"
                             onClick={handleAddToCart}
-                            disabled={loading}
+                            disabled={cartLoading}
                         >
-                            {loading ? 'Memproses...' : success ? '✓ Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
+                            {cartLoading ? 'Memproses...' : success ? '✓ Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
                         </button>
                     </div>
                 </div>

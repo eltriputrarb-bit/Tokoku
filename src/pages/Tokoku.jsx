@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 function Tokoku() {
     const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -10,6 +11,7 @@ function Tokoku() {
     const searchQuery = searchParams.get('q') || '';
 
     useEffect(() => {
+        setLoading(true);
         fetch('/api/products')
             .then(res => res.json())
             .then(data => {
@@ -22,6 +24,9 @@ function Tokoku() {
             .catch(err => {
                 console.error(err);
                 setProducts([]);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     }, []);
 
@@ -61,7 +66,19 @@ function Tokoku() {
             </h3>
 
             <div className="product-grid">
-                {filteredProducts.length === 0 ? (
+                {loading ? (
+                    // Skeleton Cards saat memuat data
+                    Array.from({ length: 8 }).map((_, index) => (
+                        <div key={index} className="skeleton-card">
+                            <div className="skeleton-img skeleton-shimmer" />
+                            <div className="skeleton-info">
+                                <div className="skeleton-title skeleton-shimmer" />
+                                <div className="skeleton-price skeleton-shimmer" />
+                                <div className="skeleton-tag skeleton-shimmer" />
+                            </div>
+                        </div>
+                    ))
+                ) : filteredProducts.length === 0 ? (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#666' }}>
                         Produk tidak ditemukan.
                     </div>
