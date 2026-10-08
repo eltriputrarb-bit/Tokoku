@@ -12,19 +12,30 @@ function Tokoku() {
     useEffect(() => {
         fetch('/api/products')
             .then(res => res.json())
-            .then(data => setProducts(data))
-            .catch(err => console.error(err));
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else {
+                    setProducts([]);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                setProducts([]);
+            });
     }, []);
 
     const categories = ['Semua', 'Pakaian', 'Sepatu', 'Tas', 'Elektronik', 'Aksesori'];
 
     // Filter kategori dan nama produk sekaligus
-    const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategory === 'Semua' ||
-            product.category?.toLowerCase() === selectedCategory.toLowerCase();
-        const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const filteredProducts = Array.isArray(products)
+        ? products.filter(product => {
+            const matchesCategory = selectedCategory === 'Semua' ||
+                product.category?.toLowerCase() === selectedCategory.toLowerCase();
+            const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesCategory && matchesSearch;
+        })
+        : [];
 
     return (
         <div className="page-container">

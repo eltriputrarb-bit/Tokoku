@@ -8,9 +8,14 @@ function AdminOrders() {
         try {
             const res = await fetch('/api/orders');
             const data = await res.json();
-            setOrders(data);
+            if (Array.isArray(data)) {
+                setOrders(data);
+            } else {
+                setOrders([]);
+            }
         } catch (err) {
             console.error(err);
+            setOrders([]);
         }
     };
 
