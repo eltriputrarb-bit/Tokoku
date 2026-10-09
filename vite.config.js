@@ -13,15 +13,7 @@ export default defineConfig({
     },
   },
   build: {
-    // 1. Matikan sourcemap agar kode asli .jsx tidak bisa diintip di DevTools
+    // Matikan sourcemap agar kode sumber asli .jsx tidak bisa diintip di DevTools
     sourcemap: false,
-    // 2. Kompresi & acak (mangle) seluruh nama variabel dan fungsi
-    minify: 'esbuild',
-    // 3. Batas ukuran chunk
-    chunkSizeWarningLimit: 1000,
-  },
-  esbuild: {
-    // 4. Hapus semua console.log otomatis saat build produksi agar tidak bocor info internal
-    drop: ['console', 'debugger'],
   },
 })
