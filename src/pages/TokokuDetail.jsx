@@ -12,7 +12,7 @@ function TokokuDetail() {
 
     useEffect(() => {
         setFetchingProduct(true);
-        fetch(`/api/products/${id}`)
+        fetch(`/st/products/${id}`)
             .then(res => res.json())
             .then(data => {
                 if (data && data._id) {
@@ -38,7 +38,7 @@ function TokokuDetail() {
         setCartLoading(true);
 
         try {
-            const res = await fetch('/api/orders', {
+            const res = await fetch('/st/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

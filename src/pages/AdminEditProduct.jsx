@@ -21,7 +21,7 @@ function AdminEditProduct() {
     const [images, setImages] = useState(['', '', '']);
 
     useEffect(() => {
-        fetch(`/api/products/${id}`)
+        fetch(`/st/products/${id}`)
             .then(res => res.json())
             .then(data => {
                 setFormData({
@@ -96,7 +96,7 @@ function AdminEditProduct() {
         const validImages = images.filter(img => img !== '');
 
         try {
-            const res = await fetch(`/api/products/${id}`, {
+            const res = await fetch(`/st/products/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

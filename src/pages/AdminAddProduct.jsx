@@ -70,7 +70,7 @@ function AdminAddProduct() {
         const validImages = images.filter(img => img !== '');
 
         try {
-            const res = await fetch('/api/products', {
+            const res = await fetch('/st/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

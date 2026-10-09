@@ -6,7 +6,7 @@ function AdminOrders() {
 
     const fetchOrders = async () => {
         try {
-            const res = await fetch('/api/orders');
+            const res = await fetch('/st/orders');
             const data = await res.json();
             if (Array.isArray(data)) {
                 setOrders(data);
@@ -27,7 +27,7 @@ function AdminOrders() {
         if (!window.confirm('Yakin ingin menghapus pesanan ini?')) return;
 
         try {
-            const res = await fetch(`/api/orders/${id}`, {
+            const res = await fetch(`/st/orders/${id}`, {
                 method: 'DELETE'
             });
 

@@ -8,7 +8,7 @@ function AdminProducts() {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('/api/products');
+            const res = await fetch('/st/products');
             const data = await res.json();
             if (Array.isArray(data)) {
                 setProducts(data);
@@ -28,7 +28,7 @@ function AdminProducts() {
     const handleDelete = async (id) => {
         if (!window.confirm('Yakin ingin menghapus produk ini?')) return;
         try {
-            const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/st/products/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setProducts(products.filter(p => p._id !== id));
             } else {

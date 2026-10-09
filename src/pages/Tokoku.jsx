@@ -12,7 +12,7 @@ function Tokoku() {
 
     useEffect(() => {
         setLoading(true);
-        fetch('/api/products')
+        fetch('/st/products')
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
