@@ -76,18 +76,18 @@ router.get('/health', (req, res) => {
     });
 });
 
-// Helper untuk menyembunyikan Base64 panjang menjadi URL gambar bersih (mirip YouTube/CDN)
+// Helper untuk menyembunyikan Base64 panjang menjadi URL gambar penyimpanan bersih (/st/images/) mirip CDN
 function sanitizeProduct(product) {
     if (!product) return null;
     const p = product.toObject ? product.toObject() : { ...product };
 
     if (p.image && p.image.startsWith('data:image')) {
-        p.image = `/api/images/${p._id}-0.jpg`;
+        p.image = `/st/images/${p._id}-0.jpg`;
     }
     if (Array.isArray(p.images)) {
         p.images = p.images.map((img, idx) => {
             if (img && img.startsWith('data:image')) {
-                return `/api/images/${p._id}-${idx}.jpg`;
+                return `/st/images/${p._id}-${idx}.jpg`;
             }
             return img;
         });
@@ -170,13 +170,13 @@ router.put('/products/:id', async (req, res) => {
 
         const updateData = { ...req.body };
 
-        // Jika foto dikirim kembali sebagai URL /api/images, pertahankan base64 lama
-        if (updateData.image && updateData.image.startsWith('/api/images')) {
+        // Jika foto dikirim kembali sebagai URL /st/images atau /api/images, pertahankan base64 lama
+        if (updateData.image && (updateData.image.startsWith('/st/images') || updateData.image.startsWith('/api/images'))) {
             updateData.image = existing.image;
         }
         if (Array.isArray(updateData.images)) {
             updateData.images = updateData.images.map((img, idx) => {
-                if (img && img.startsWith('/api/images')) {
+                if (img && (img.startsWith('/st/images') || img.startsWith('/api/images'))) {
                     return (existing.images && existing.images[idx]) ? existing.images[idx] : existing.image;
                 }
                 return img;
@@ -228,7 +228,8 @@ router.delete('/orders/:id', async (req, res) => {
     }
 });
 
-// Dukung route dengan prefix /api maupun root router
+// Dukung route dengan prefix /st (storage assets), /api, maupun root
+app.use('/st', router);
 app.use('/api', router);
 app.use('/', router);
 
