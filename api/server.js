@@ -76,11 +76,68 @@ router.get('/health', (req, res) => {
     });
 });
 
-// Endpoint API Produk
+// Helper untuk menyembunyikan Base64 panjang menjadi URL gambar bersih (mirip YouTube/CDN)
+function sanitizeProduct(product) {
+    if (!product) return null;
+    const p = product.toObject ? product.toObject() : { ...product };
+
+    if (p.image && p.image.startsWith('data:image')) {
+        p.image = `/api/images/${p._id}-0.jpg`;
+    }
+    if (Array.isArray(p.images)) {
+        p.images = p.images.map((img, idx) => {
+            if (img && img.startsWith('data:image')) {
+                return `/api/images/${p._id}-${idx}.jpg`;
+            }
+            return img;
+        });
+    }
+    return p;
+}
+
+// Endpoint Khusus Stream Gambar Biner (Menyamarkan data base64 menjadi URL file .jpg seperti YouTube)
+router.get('/images/:file', async (req, res) => {
+    try {
+        const fileParam = req.params.file.replace(/\.jpg$|\.jpeg$|\.png$|\.webp$/i, '');
+        const parts = fileParam.split('-');
+        const productId = parts[0];
+        const imgIndex = parts[1] !== undefined ? parseInt(parts[1], 10) : 0;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Gambar tidak ditemukan' });
+        }
+
+        let rawBase64 = '';
+        if (Array.isArray(product.images) && product.images[imgIndex]) {
+            rawBase64 = product.images[imgIndex];
+        } else if (imgIndex === 0 && product.image) {
+            rawBase64 = product.image;
+        }
+
+        if (!rawBase64 || !rawBase64.startsWith('data:image')) {
+            return res.status(404).json({ message: 'Data gambar kosong' });
+        }
+
+        const mimeMatch = rawBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const cleanBase64 = rawBase64.replace(/^data:image\/\w+;base64,/, '');
+        const imgBuffer = Buffer.from(cleanBase64, 'base64');
+
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+        return res.send(imgBuffer);
+    } catch (err) {
+        return res.status(400).json({ message: 'Gagal memuat gambar', error: err.message });
+    }
+});
+
+// Endpoint API Produk (Data Base64 disembunyikan dan diubah menjadi URL gambar rapi)
 router.get('/products', async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
-        res.json(products);
+        const sanitized = products.map(sanitizeProduct);
+        res.json(sanitized);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -90,7 +147,7 @@ router.get('/products/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ message: 'Produk tidak ditemukan' });
-        res.json(product);
+        res.json(sanitizeProduct(product));
     } catch (err) {
         res.status(400).json({ message: 'ID tidak valid' });
     }
@@ -100,7 +157,7 @@ router.post('/products', async (req, res) => {
     try {
         const newProduct = new Product(req.body);
         await newProduct.save();
-        res.status(201).json(newProduct);
+        res.status(201).json(sanitizeProduct(newProduct));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -108,9 +165,26 @@ router.post('/products', async (req, res) => {
 
 router.put('/products/:id', async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedProduct) return res.status(404).json({ message: 'Produk tidak ditemukan' });
-        res.json(updatedProduct);
+        const existing = await Product.findById(req.params.id);
+        if (!existing) return res.status(404).json({ message: 'Produk tidak ditemukan' });
+
+        const updateData = { ...req.body };
+
+        // Jika foto dikirim kembali sebagai URL /api/images, pertahankan base64 lama
+        if (updateData.image && updateData.image.startsWith('/api/images')) {
+            updateData.image = existing.image;
+        }
+        if (Array.isArray(updateData.images)) {
+            updateData.images = updateData.images.map((img, idx) => {
+                if (img && img.startsWith('/api/images')) {
+                    return (existing.images && existing.images[idx]) ? existing.images[idx] : existing.image;
+                }
+                return img;
+            });
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json(sanitizeProduct(updatedProduct));
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
