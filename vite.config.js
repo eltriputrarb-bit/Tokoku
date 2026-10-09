@@ -18,12 +18,18 @@ function customObfuscatorPlugin() {
             selfDefending: false,
             stringArray: true,
             stringArrayEncoding: ['base64'],
-            stringArrayThreshold: 0.8,
+            stringArrayThreshold: 1, // 100% dari semua teks string diobfuscate (termasuk /api/..., TokoKu, dll)
+            stringArrayCallsTransform: true,
+            stringArrayCallsTransformThreshold: 1,
             stringArrayRotate: true,
             stringArrayShuffle: true,
             stringArrayIndexShift: true,
-            stringArrayWrappersCount: 1,
+            stringArrayWrappersCount: 2,
             stringArrayWrappersChainedCalls: true,
+            splitStrings: true,
+            splitStringsChunkLength: 4,
+            transformObjectKeys: true,
+            unicodeEscapeSequence: true,
             simplify: true,
           })
           file.code = result.getObfuscatedCode()
