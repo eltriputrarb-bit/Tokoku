@@ -132,8 +132,18 @@ router.get('/images/:file', async (req, res) => {
     }
 });
 
+// Middleware: Cegah pengunjung membuka langsung JSON mentah di address bar browser
+function protectDataRoute(req, res, next) {
+    const isDirectBrowserVisit = req.headers['sec-fetch-dest'] === 'document' ||
+        (req.headers['accept'] && req.headers['accept'].startsWith('text/html'));
+    if (isDirectBrowserVisit) {
+        return res.redirect('/');
+    }
+    next();
+}
+
 // Endpoint API Produk (Data Base64 disembunyikan dan diubah menjadi URL gambar rapi)
-router.get('/products', async (req, res) => {
+router.get('/products', protectDataRoute, async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
         const sanitized = products.map(sanitizeProduct);
@@ -143,7 +153,7 @@ router.get('/products', async (req, res) => {
     }
 });
 
-router.get('/products/:id', async (req, res) => {
+router.get('/products/:id', protectDataRoute, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ message: 'Produk tidak ditemukan' });
@@ -170,7 +180,7 @@ router.put('/products/:id', async (req, res) => {
 
         const updateData = { ...req.body };
 
-        // Jika foto dikirim kembali sebagai URL /st/images atau /api/images, pertahankan base64 lama
+        // Jika foto dikirim kembali sebagai URL /st/images, pertahankan base64 lama
         if (updateData.image && (updateData.image.startsWith('/st/images') || updateData.image.startsWith('/api/images'))) {
             updateData.image = existing.image;
         }
@@ -200,7 +210,7 @@ router.delete('/products/:id', async (req, res) => {
 });
 
 // Endpoint API Pesanan
-router.get('/orders', async (req, res) => {
+router.get('/orders', protectDataRoute, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
         res.json(orders);
@@ -228,10 +238,13 @@ router.delete('/orders/:id', async (req, res) => {
     }
 });
 
-// Dukung route dengan prefix /st (storage assets), /api, maupun root
+// Blokir total semua akses /api (Anti API)
+app.all('/api*', (req, res) => {
+    res.status(404).json({ error: 'Endpoint tidak ditemukan' });
+});
+
+// Hanya gunakan prefix /st (Storage stream data & gambar)
 app.use('/st', router);
-app.use('/api', router);
-app.use('/', router);
 
 // Jalankan listener jika file dijalankan langsung (lokal)
 if (require.main === module) {
