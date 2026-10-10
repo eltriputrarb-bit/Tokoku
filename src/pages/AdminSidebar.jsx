@@ -5,9 +5,14 @@ function AdminSidebar() {
 
     return (
         <aside className="admin-sidebar">
-            <div className="admin-brand">
-                <h2>TokoKu</h2>
-                <span>Admin</span>
+            <div className="admin-sidebar-header">
+                <div className="admin-brand">
+                    <h2>TokoKu</h2>
+                    <span>Admin</span>
+                </div>
+                <button className="btn-logout btn-logout-mobile" onClick={() => navigate('/')}>
+                    Keluar
+                </button>
             </div>
             <nav className="admin-nav">
                 <NavLink
@@ -23,7 +28,7 @@ function AdminSidebar() {
                     Pesanan
                 </NavLink>
             </nav>
-            <button className="btn-logout" onClick={() => navigate('/')}>
+            <button className="btn-logout btn-logout-desktop" onClick={() => navigate('/')}>
                 Keluar Toko
             </button>
         </aside>
