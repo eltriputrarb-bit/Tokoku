@@ -135,7 +135,7 @@ router.get('/images/:file', async (req, res) => {
 // Middleware: Cegah pengunjung membuka langsung JSON mentah di address bar browser
 function protectDataRoute(req, res, next) {
     const isDirectBrowserVisit = req.headers['sec-fetch-dest'] === 'document' ||
-        (req.headers['accept'] && req.headers['accept'].startsWith('text/html'));
+        (typeof req.headers['accept'] === 'string' && req.headers['accept'].startsWith('text/html'));
     if (isDirectBrowserVisit) {
         return res.redirect('/');
     }
@@ -239,12 +239,13 @@ router.delete('/orders/:id', async (req, res) => {
 });
 
 // Blokir total semua akses /api (Anti API)
-app.all('/api*', (req, res) => {
+app.use('/api', (req, res) => {
     res.status(404).json({ error: 'Endpoint tidak ditemukan' });
 });
 
-// Hanya gunakan prefix /st (Storage stream data & gambar)
+// Routing data & gambar (/st dan internal serverless)
 app.use('/st', router);
+app.use('/', router);
 
 // Jalankan listener jika file dijalankan langsung (lokal)
 if (require.main === module) {
