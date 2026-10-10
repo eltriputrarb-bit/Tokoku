@@ -1111,32 +1111,55 @@ body,
    RESPONSIVE (Mobile iPhone / Android & Layar <= 768px)
    ========================================================== */
 @media (max-width: 768px) {
-  /* 1. Header & Navigasi Mobile */
+  /* 1. Header & Navigasi Mobile (Kiri: TokoKu, Tengah: Cari, Kanan: Login Admin) */
   .header-inner {
-    padding: 10px 14px;
-    gap: 10px;
-    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    width: 100%;
   }
 
   .brand-logo {
-    font-size: 20px;
-  }
-
-  .btn-admin {
-    padding: 6px 14px;
-    font-size: 13px;
+    font-size: 18px;
+    flex-shrink: 0;
   }
 
   .search-box {
-    order: 3;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     max-width: 100%;
-    margin-top: 4px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .search-icon {
+    left: 9px;
+    font-size: 12px;
   }
 
   .search-box input {
-    padding: 9px 14px 9px 34px;
-    font-size: 13px;
+    width: 100%;
+    padding: 7px 10px 7px 28px;
+    font-size: 12px;
+    border-radius: 6px;
+    height: 34px;
+  }
+
+  .btn-admin {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* 2. Beranda Tokoku */
