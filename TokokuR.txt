@@ -1,0 +1,24 @@
+Tokoku/
+├── index.html
+├── api/ ----> database dan page
+    │  ├── index.js
+    │  └── server.js
+├── package.json
+├── public/
+│   ├── images/       ← taruh semua foto/logo di sini
+└── src/
+    ├── main.jsx
+    ├── App.jsx        (routing)
+    ├── style.css
+    ├── components/  -----> belum database
+    │   ├── Footer.jsx 
+    │   └── Header.jsx
+    └── pages/  ----> database 
+        ├── Tokoku.jsx
+	    ├── TokokuDetail.jsx
+        ├── AdminSidebar.jsx
+        ├── AdminProducts.jsx
+        ├── AdminOrders.jsx
+        ├── AdminLogin.jsx
+        ├── AdminEditProduct.jsx
+        ├── AdminAddProduct.jsx
