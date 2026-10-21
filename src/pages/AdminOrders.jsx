@@ -46,7 +46,7 @@ function AdminOrders() {
             <AdminSidebar />
             <main className="admin-content">
                 <div className="admin-header-row">
-                    <h1>Daftar Pesanan Masuk PTC</h1>
+                    <h1>Daftar Pesanan Masuk PTC he</h1>
                 </div>
 
                 <div className="table-card">
